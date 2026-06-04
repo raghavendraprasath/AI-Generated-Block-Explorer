@@ -372,6 +372,28 @@ LIMIT 1;
 
 ---
 
+# Screenshots Gallery
+
+Below are thumbnails of all screenshots in `Tooling-for-AI-Generated-Block-Explorer/Screenshots/`, with a short description for each.
+
+> Note: This README also references a separate `screenshots/` folder (lowercase) for inline evidence images used throughout the write-up. The gallery below is specifically for the `Screenshots/` (capital S) folder.
+
+| Thumbnail | Description |
+|---|---|
+| [![Bitcoin Core Built](Screenshots/Bitcoin%20Core%20Built.png)](Screenshots/Bitcoin%20Core%20Built.png) | Bitcoin Core successfully built/compiled from source (build completion output). |
+| [![Bitcoin Core Tests](Screenshots/Bitcoin%20Core%20Tests.png)](Screenshots/Bitcoin%20Core%20Tests.png) | Bitcoin Core test suite execution results showing tests passed. |
+| [![Bitcoin Core Version](Screenshots/Bitcoin%20Core%20Version.png)](Screenshots/Bitcoin%20Core%20Version.png) | Version verification of built Bitcoin Core binaries (e.g., `bitcoind`, `bitcoin-cli`, `bitcoin-qt`). |
+| [![Bitcoin Process Stopped](Screenshots/Bitcoin%20Process%20Stopped.png)](Screenshots/Bitcoin%20Process%20Stopped.png) | Example of stopping the Bitcoin process / daemon shutdown output. |
+| [![Dockerfile Screenshot](Screenshots/Dockerfile%20Screenshot.png)](Screenshots/Dockerfile%20Screenshot.png) | Dockerfile contents used to build the Python container image. |
+| [![Text-To-SQL Prompt](Screenshots/Text-To-SQL%20Prompt.png)](Screenshots/Text-To-SQL%20Prompt.png) | Text-to-SQL prompt/example interaction used for generating SQL from natural language. |
+| [![bitcoin conf created](Screenshots/bitcoin%20conf%20created.png)](Screenshots/bitcoin%20conf%20created.png) | Creation of `bitcoin.conf` configuration file (RPC/server settings). |
+| [![bitcoin-cli RPC working](Screenshots/bitcoin-cli%20RPC%20working.png)](Screenshots/bitcoin-cli%20RPC%20working.png) | Successful RPC call via `bitcoin-cli`, confirming node connectivity and RPC credentials. |
+| [![bitcoind running](Screenshots/bitcoind%20running.png)](Screenshots/bitcoind%20running.png) | `bitcoind` running (daemon started) and initial runtime output. |
+| [![curl RPC command](Screenshots/curl%20RPC%20command.png)](Screenshots/curl%20RPC%20command.png) | RPC verification using a raw `curl` JSON-RPC command. |
+| [![debug log proof](Screenshots/debug%20log%20proof.png)](Screenshots/debug%20log%20proof.png) | Proof/debug output showing `~/.bitcoin/debug.log` activity (node + RPC events). |
+
+---
+
 # Deliverables
 
 This folder contains:
@@ -409,4 +431,4 @@ This assignment provided practical experience with:
 
 The required tooling for the AI-Generated Block Explorer project was successfully installed, configured, tested, and documented.
 
-The environment is now prepared for future milestones involving blockchain data extraction, database integration, AI-assisted querying, and development of a complete Bitcoin Block Explorer application.
+The environment is now prepared for future milestones involving blockchain data extraction, database integration, AI-assisted querying, and development of a complete Bitcoin Block Explorer applic[...]
