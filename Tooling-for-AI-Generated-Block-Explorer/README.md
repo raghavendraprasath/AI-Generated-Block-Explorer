@@ -81,11 +81,7 @@ The Docker image was successfully built and executed.
 
 | Thumbnail | Description |
 |---|---|
-| [![Docker Build](Screenshots/Dockerfile%20Screenshot.png)](Screenshots/Dockerfile%20Screenshot.png) | Docker build evidence (Dockerfile used to create the container image). |
-
-### Docker Run
-
-> Screenshot not found in `Tooling-for-AI-Generated-Block-Explorer/Screenshots/` for the Docker run output.
+| [![Dockerfile Screenshot](Screenshots/Dockerfile%20Screenshot.png)](Screenshots/Dockerfile%20Screenshot.png) | Dockerfile used to build the Python container image. |
 
 ---
 
@@ -169,7 +165,7 @@ Verified the generated binaries.
 
 | Thumbnail | Description |
 |---|---|
-| [![Bitcoin Core Version](Screenshots/Bitcoin%20Core%20Version.png)](Screenshots/Bitcoin%20Core%20Version.png) | Version verification of built Bitcoin Core binaries (e.g., `bitcoind`, `bitcoin-cli`, `bitcoin-qt`). |
+| [![Bitcoin Core Version](Screenshots/Bitcoin%20Core%20Version.png)](Screenshots/Bitcoin%20Core%20Version.png) | Version verification of built Bitcoin Core binaries (`bitcoind`, `bitcoin-cli`, etc.). |
 
 ---
 
@@ -243,6 +239,12 @@ The node started successfully and began network synchronization.
 |---|---|
 | [![bitcoind running](Screenshots/bitcoind%20running.png)](Screenshots/bitcoind%20running.png) | `bitcoind` running (daemon started) and initial runtime output. |
 
+## Screenshot – Bitcoin process stopped
+
+| Thumbnail | Description |
+|---|---|
+| [![Bitcoin Process Stopped](Screenshots/Bitcoin%20Process%20Stopped.png)](Screenshots/Bitcoin%20Process%20Stopped.png) | Example of stopping the Bitcoin daemon / process shutdown output. |
+
 ---
 
 # RPC Verification
@@ -259,13 +261,13 @@ Verified Bitcoin Core Remote Procedure Call (RPC) functionality.
 
 The commands successfully returned blockchain information and confirmed communication between bitcoin-cli and bitcoind.
 
-### Screenshot – RPC Verification
+### Screenshot – RPC Verification (bitcoin-cli)
 
 | Thumbnail | Description |
 |---|---|
 | [![bitcoin-cli RPC working](Screenshots/bitcoin-cli%20RPC%20working.png)](Screenshots/bitcoin-cli%20RPC%20working.png) | Successful RPC call via `bitcoin-cli`, confirming node connectivity and RPC credentials. |
 
-## Screenshot – curl RPC command
+### Screenshot – RPC Verification (curl)
 
 | Thumbnail | Description |
 |---|---|
@@ -392,7 +394,7 @@ LIMIT 1;
 
 ---
 
-## Screenshot – Text-to-SQL Output
+## Screenshot – Text-to-SQL Prompt
 
 | Thumbnail | Description |
 |---|---|
@@ -413,7 +415,7 @@ Tooling-for-AI-Generated-Block-Explorer/
 ├── text_to_sql.py
 ├── debug.log
 │
-└── screenshots/
+└── Screenshots/
 ```
 
 ---
