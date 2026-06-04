@@ -79,11 +79,13 @@ The Docker image was successfully built and executed.
 
 ### Docker Build
 
-![Docker Build](screenshots/docker_build.png)
+| Thumbnail | Description |
+|---|---|
+| [![Docker Build](Screenshots/Dockerfile%20Screenshot.png)](Screenshots/Dockerfile%20Screenshot.png) | Docker build evidence (Dockerfile used to create the container image). |
 
 ### Docker Run
 
-![Docker Run](screenshots/docker_run.png)
+> Screenshot not found in `Tooling-for-AI-Generated-Block-Explorer/Screenshots/` for the Docker run output.
 
 ---
 
@@ -143,7 +145,9 @@ bitcoind
 
 ### Screenshot – Successful Build
 
-![Bitcoin Build](screenshots/bitcoin_build.png)
+| Thumbnail | Description |
+|---|---|
+| [![Bitcoin Core Built](Screenshots/Bitcoin%20Core%20Built.png)](Screenshots/Bitcoin%20Core%20Built.png) | Bitcoin Core successfully built/compiled from source (build completion output). |
 
 ---
 
@@ -163,7 +167,9 @@ Verified the generated binaries.
 
 ### Screenshot – Version Verification
 
-![Bitcoin Version](screenshots/bitcoin_version.png)
+| Thumbnail | Description |
+|---|---|
+| [![Bitcoin Core Version](Screenshots/Bitcoin%20Core%20Version.png)](Screenshots/Bitcoin%20Core%20Version.png) | Version verification of built Bitcoin Core binaries (e.g., `bitcoind`, `bitcoin-cli`, `bitcoin-qt`). |
 
 ---
 
@@ -187,7 +193,9 @@ ctest --test-dir build-gui
 
 ### Screenshot – Test Results
 
-![Bitcoin Tests](screenshots/bitcoin_tests.png)
+| Thumbnail | Description |
+|---|---|
+| [![Bitcoin Core Tests](Screenshots/Bitcoin%20Core%20Tests.png)](Screenshots/Bitcoin%20Core%20Tests.png) | Bitcoin Core test suite execution results showing tests passed. |
 
 ---
 
@@ -211,7 +219,9 @@ rpcpassword=test
 
 ### Screenshot – bitcoin.conf
 
-![Bitcoin Configuration](screenshots/bitcoin_conf.png)
+| Thumbnail | Description |
+|---|---|
+| [![bitcoin conf created](Screenshots/bitcoin%20conf%20created.png)](Screenshots/bitcoin%20conf%20created.png) | Creation of `bitcoin.conf` configuration file (RPC/server settings). |
 
 ---
 
@@ -226,6 +236,12 @@ Started Bitcoin Core in daemon mode.
 ```
 
 The node started successfully and began network synchronization.
+
+## Screenshot – bitcoind running
+
+| Thumbnail | Description |
+|---|---|
+| [![bitcoind running](Screenshots/bitcoind%20running.png)](Screenshots/bitcoind%20running.png) | `bitcoind` running (daemon started) and initial runtime output. |
 
 ---
 
@@ -245,7 +261,15 @@ The commands successfully returned blockchain information and confirmed communic
 
 ### Screenshot – RPC Verification
 
-![RPC Commands](screenshots/rpc_commands.png)
+| Thumbnail | Description |
+|---|---|
+| [![bitcoin-cli RPC working](Screenshots/bitcoin-cli%20RPC%20working.png)](Screenshots/bitcoin-cli%20RPC%20working.png) | Successful RPC call via `bitcoin-cli`, confirming node connectivity and RPC credentials. |
+
+## Screenshot – curl RPC command
+
+| Thumbnail | Description |
+|---|---|
+| [![curl RPC command](Screenshots/curl%20RPC%20command.png)](Screenshots/curl%20RPC%20command.png) | RPC verification using a raw `curl` JSON-RPC command. |
 
 ---
 
@@ -269,7 +293,9 @@ The log captures:
 
 ### Screenshot – Debug Log
 
-![Debug Log](screenshots/debug_log.png)
+| Thumbnail | Description |
+|---|---|
+| [![debug log proof](Screenshots/debug%20log%20proof.png)](Screenshots/debug%20log%20proof.png) | Proof/debug output showing `~/.bitcoin/debug.log` activity (node + RPC events). |
 
 ---
 
@@ -368,29 +394,9 @@ LIMIT 1;
 
 ## Screenshot – Text-to-SQL Output
 
-![Text to SQL](screenshots/text_to_sql.png)
-
----
-
-# Screenshots Gallery
-
-Below are thumbnails of all screenshots in `Tooling-for-AI-Generated-Block-Explorer/Screenshots/`, with a short description for each.
-
-> Note: This README also references a separate `screenshots/` folder (lowercase) for inline evidence images used throughout the write-up. The gallery below is specifically for the `Screenshots/` (capital S) folder.
-
 | Thumbnail | Description |
 |---|---|
-| [![Bitcoin Core Built](Screenshots/Bitcoin%20Core%20Built.png)](Screenshots/Bitcoin%20Core%20Built.png) | Bitcoin Core successfully built/compiled from source (build completion output). |
-| [![Bitcoin Core Tests](Screenshots/Bitcoin%20Core%20Tests.png)](Screenshots/Bitcoin%20Core%20Tests.png) | Bitcoin Core test suite execution results showing tests passed. |
-| [![Bitcoin Core Version](Screenshots/Bitcoin%20Core%20Version.png)](Screenshots/Bitcoin%20Core%20Version.png) | Version verification of built Bitcoin Core binaries (e.g., `bitcoind`, `bitcoin-cli`, `bitcoin-qt`). |
-| [![Bitcoin Process Stopped](Screenshots/Bitcoin%20Process%20Stopped.png)](Screenshots/Bitcoin%20Process%20Stopped.png) | Example of stopping the Bitcoin process / daemon shutdown output. |
-| [![Dockerfile Screenshot](Screenshots/Dockerfile%20Screenshot.png)](Screenshots/Dockerfile%20Screenshot.png) | Dockerfile contents used to build the Python container image. |
 | [![Text-To-SQL Prompt](Screenshots/Text-To-SQL%20Prompt.png)](Screenshots/Text-To-SQL%20Prompt.png) | Text-to-SQL prompt/example interaction used for generating SQL from natural language. |
-| [![bitcoin conf created](Screenshots/bitcoin%20conf%20created.png)](Screenshots/bitcoin%20conf%20created.png) | Creation of `bitcoin.conf` configuration file (RPC/server settings). |
-| [![bitcoin-cli RPC working](Screenshots/bitcoin-cli%20RPC%20working.png)](Screenshots/bitcoin-cli%20RPC%20working.png) | Successful RPC call via `bitcoin-cli`, confirming node connectivity and RPC credentials. |
-| [![bitcoind running](Screenshots/bitcoind%20running.png)](Screenshots/bitcoind%20running.png) | `bitcoind` running (daemon started) and initial runtime output. |
-| [![curl RPC command](Screenshots/curl%20RPC%20command.png)](Screenshots/curl%20RPC%20command.png) | RPC verification using a raw `curl` JSON-RPC command. |
-| [![debug log proof](Screenshots/debug%20log%20proof.png)](Screenshots/debug%20log%20proof.png) | Proof/debug output showing `~/.bitcoin/debug.log` activity (node + RPC events). |
 
 ---
 
