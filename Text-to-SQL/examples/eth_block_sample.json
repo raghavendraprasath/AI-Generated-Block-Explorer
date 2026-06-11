@@ -1,0 +1,10 @@
+{
+  "number": 19000000,
+  "hash": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+  "parentHash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+  "timestamp": 1705612200,
+  "gasUsed": 12500000,
+  "gasLimit": 30000000,
+  "miner": "0xMinerAddress0000000000000000000000000001",
+  "transactionCount": 142
+}

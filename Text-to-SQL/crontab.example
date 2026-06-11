@@ -1,0 +1,13 @@
+# Run every 5 minutes — adjust paths for your machine (WSL example).
+# Install: crontab -e  then paste the line below.
+#
+# SHELL=/bin/bash
+# PATH=/usr/bin:/bin
+#
+# Recommended: use Linux DB path (avoids WSL /mnt/c SQLite disk I/O errors)
+# Install: ./scripts/install_cron.sh ~/hw3-data/blockchain.db
+
+SHELL=/bin/bash
+PATH=/usr/bin:/bin
+
+*/5 * * * * cd /mnt/c/Users/adity/Desktop/INFO7500/AI-Generated-Block-Explorer/Text-to-SQL && /usr/bin/python3 updater.py --db /home/adity/hw3-data/blockchain.db >> logs/cron.log 2>&1

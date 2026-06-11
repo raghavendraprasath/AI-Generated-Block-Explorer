@@ -1,0 +1,8 @@
+[
+  {"date": "2009-01-03", "price_usd": 0.0, "source": "historical_estimate"},
+  {"date": "2010-07-17", "price_usd": 0.05, "source": "historical_estimate"},
+  {"date": "2013-11-29", "price_usd": 1242.0, "source": "historical_estimate"},
+  {"date": "2017-12-17", "price_usd": 19783.0, "source": "historical_estimate"},
+  {"date": "2021-11-10", "price_usd": 68789.0, "source": "historical_estimate"},
+  {"date": "2024-01-01", "price_usd": 42265.0, "source": "historical_estimate"}
+]

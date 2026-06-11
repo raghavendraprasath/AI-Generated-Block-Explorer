@@ -1,0 +1,35 @@
+# SQLite database (large — ~500MB+ after 100k ingest)
+blockchain.db
+blockchain.db-wal
+blockchain.db-shm
+*.db-journal
+
+# Alternate ingest location on WSL Linux filesystem
+hw3-data/
+
+# Logs from updater/cron
+logs/
+*.log
+
+# Generated charts (keep examples via README commands)
+charts/*.png
+charts/*.pdf
+!charts/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.env
+
+# API keys
+.env.local
+*.key
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

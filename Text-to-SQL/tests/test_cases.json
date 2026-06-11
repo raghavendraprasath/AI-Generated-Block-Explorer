@@ -1,0 +1,62 @@
+[
+  {
+    "question": "How many blocks are stored in the database?",
+    "sql": "SELECT COUNT(*) FROM blocks",
+    "answer": 110029
+  },
+  {
+    "question": "What is the highest block height?",
+    "sql": "SELECT MAX(height) FROM blocks",
+    "answer": 110028
+  },
+  {
+    "question": "What is the hash of the genesis block at height 0?",
+    "sql": "SELECT hash FROM blocks WHERE height = 0",
+    "answer": "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
+  },
+  {
+    "question": "How many transactions are stored in total?",
+    "sql": "SELECT COUNT(*) FROM transactions",
+    "answer": 289907
+  },
+  {
+    "question": "How many transactions are in block 100000?",
+    "sql": "SELECT COUNT(*) FROM transactions WHERE block_height = 100000",
+    "answer": 4
+  },
+  {
+    "question": "Which block height has the most transactions?",
+    "sql": "SELECT block_height FROM transactions GROUP BY block_height ORDER BY COUNT(*) DESC LIMIT 1",
+    "answer": 93107
+  },
+  {
+    "question": "What is the Unix timestamp of block 100000?",
+    "sql": "SELECT time FROM blocks WHERE height = 100000",
+    "answer": 1293623863
+  },
+  {
+    "question": "How many distinct output addresses are in the database?",
+    "sql": "SELECT COUNT(DISTINCT scriptpubkey_address) FROM transaction_outputs WHERE scriptpubkey_address IS NOT NULL",
+    "answer": 142585
+  },
+  {
+    "question": "What is the average fee among transactions with a fee greater than zero?",
+    "sql": "SELECT ROUND(AVG(fee), 8) FROM transactions WHERE fee > 0",
+    "answer": 0.03167824
+  },
+  {
+    "question": "How many blocks have a timestamp before 2010 (before Unix time 1262304000)?",
+    "sql": "SELECT COUNT(*) FROM blocks WHERE time < 1262304000",
+    "answer": 32490
+  },
+  {
+    "question": "What is the hash of the block at the maximum height?",
+    "sql": "SELECT hash FROM blocks ORDER BY height DESC LIMIT 1",
+    "answer": "0000000000001c1a1a61bba59f0382f24e74a938efb9460f9b71daeedf681b39"
+  },
+  {
+    "question": "What is the total output value in BTC for the genesis block?",
+    "sql": "SELECT SUM(o.value) FROM transaction_outputs o JOIN transactions t ON o.txid = t.txid WHERE t.block_height = 0",
+    "answer": 50.0
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "question": "What is the current live Bitcoin price from CoinGecko right now?",
+    "expected": "CANNOT_ANSWER",
+    "reason": "Database has historical sample prices only, not a live API feed."
+  },
+  {
+    "question": "What is Apple's stock price today?",
+    "expected": "CANNOT_ANSWER",
+    "reason": "No equity market data in the schema."
+  },
+  {
+    "question": "How many Dogecoin blocks have been mined?",
+    "expected": "CANNOT_ANSWER",
+    "reason": "Only Bitcoin and a single Ethereum sample block are stored."
+  },
+  {
+    "question": "What is the weather in Boston today?",
+    "expected": "CANNOT_ANSWER",
+    "reason": "Question is unrelated to blockchain or pricing tables."
+  }
+]

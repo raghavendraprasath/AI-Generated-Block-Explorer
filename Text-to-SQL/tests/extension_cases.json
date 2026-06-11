@@ -1,0 +1,12 @@
+[
+  {
+    "question": "What was the BTC price in USD on 2024-01-01?",
+    "sql": "SELECT price_usd FROM btc_daily_prices WHERE date = '2024-01-01'",
+    "answer": 42265.0
+  },
+  {
+    "question": "What is the Ethereum block number in our ethereum_blocks table?",
+    "sql": "SELECT number FROM ethereum_blocks LIMIT 1",
+    "answer": 19000000
+  }
+]
