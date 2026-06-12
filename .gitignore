@@ -1,0 +1,13 @@
+# Local Python environments
+.venv/
+venv/
+
+# Secrets
+.env
+.env.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

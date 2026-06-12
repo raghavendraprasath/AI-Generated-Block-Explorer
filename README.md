@@ -74,9 +74,10 @@ Text-to-SQL (`Text-to-SQL/`)
 - SQLite schema from `getblock(hash, 2)` JSON
 - Deterministic ingestion + scheduled updater
 - Natural language → SQL → answers (OpenRouter)
-- Test suite, hard-failure analysis, **Block Explorer AI** UI, charts
+- Test suite (12 golden cases), hard-failure analysis, **Block Explorer AI** UI, charts
+- Class slides: `Text-to-SQL/slides/hard_failures.pptx`
 
-See [`Text-to-SQL/README.md`](Text-to-SQL/README.md) for full documentation and screenshots.
+See [`Text-to-SQL/README.md`](Text-to-SQL/README.md) for full documentation, architecture, and screenshots.
 
 ---
 

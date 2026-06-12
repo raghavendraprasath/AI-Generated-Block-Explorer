@@ -40,6 +40,72 @@ The Streamlit application is branded **Block Explorer AI** — plain-English que
 
 ---
 
+# Architecture
+
+End-to-end pipeline from Bitcoin Core to natural-language answers:
+
+```text
+bitcoind (RPC)
+    │  getblock(hash, 2)
+    ▼
+ingest.py / updater.py  ──►  blockchain.db (SQLite)
+    │                            │
+    │                            ├── schema from sqlite_master
+    ▼                            ▼
+validate.py                 text_to_sql.py  ──►  SQL answer
+(cron every 5 min)               │
+                                 ├── chat.py (CLI)
+                                 └── Home.py · Insights · Samples (Streamlit)
+```
+
+```mermaid
+flowchart LR
+  A[bitcoind RPC] --> B[ingest.py / updater.py]
+  B --> C[(blockchain.db)]
+  C --> D[validate.py]
+  C --> E[text_to_sql.py]
+  E --> F[CLI / Block Explorer AI]
+```
+
+**Data flow:** `bitcoind` serves blocks → deterministic Python ingest writes normalized rows → `validate.py` checks consistency → the LLM receives live schema + question → SQLite executes generated SQL → answer returned in terminal or web UI.
+
+---
+
+# Setup
+
+```bash
+cd Text-to-SQL
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+cp .env.example .env
+# Edit .env: OPENROUTER_API_KEY=sk-or-v1-...
+```
+
+Use `~/hw3-data/blockchain.db` on WSL — avoid `/mnt/c/...` (SQLite disk I/O errors).
+
+### Database (`blockchain.db`)
+
+Not committed to GitHub (~500 MB+). Build locally or copy to WSL:
+
+```bash
+mkdir -p ~/hw3-data
+# initial ingest (see Part 3), or copy an existing blockchain.db
+```
+
+**Current dataset** (after updater sync; refresh with `scripts/refresh_test_answers.py` if blocks grow):
+
+| Metric | Value |
+|--------|------:|
+| Blocks stored | 110,029 |
+| Max block height | 110,028 |
+| Transactions | 289,907 |
+
+`blockchain.db` is **gitignored**. Do not commit `.env`, `logs/`, or `.venv/`.
+
+---
+
 # Part 1 – Bitcoin Core Sync
 
 ## Objective
@@ -164,6 +230,7 @@ updater.py
 validate.py
 ingest_extensions.py
 schema_extensions.sql
+prompts/ingest_llm_prompt.md
 scripts/install_cron.sh
 crontab.example
 ```
@@ -188,7 +255,19 @@ python3 updater.py --db ~/hw3-data/blockchain.db
 ./scripts/install_cron.sh ~/hw3-data/blockchain.db
 ```
 
-Logs: `logs/cron.log`, `logs/updater.log`
+Installed crontab line (`scripts/install_cron.sh`):
+
+```text
+*/5 * * * * cd Text-to-SQL && .venv/bin/python3 updater.py --db ~/hw3-data/blockchain.db >> logs/cron.log 2>&1
+```
+
+See also `crontab.example`. Logs: `logs/cron.log`, `logs/updater.log`
+
+## Deterministic ingestion (bonus)
+
+Production ingestion uses **`ingest.py`** — deterministic RPC → SQL mapping, guaranteed correct on every run.
+
+An LLM-based ingest approach is documented for comparison in `prompts/ingest_llm_prompt.md`; it is **not** used in production because assignment bonus requires 100% correctness.
 
 ## Validation
 
@@ -322,7 +401,7 @@ SELECT COUNT(*) FROM blocks
 
 ## Objective
 
-Define at least 10 test triples (question, SQL, answer) and verify them against the database.
+Define at least 10 test triples (question, SQL, answer) and verify them against the database. This project includes **12** standard cases (exceeds the minimum of 10).
 
 ## Files
 
@@ -347,6 +426,14 @@ Standard tests: 12 passed, 0 failed
 
 Golden tests validate the **database and reference SQL** — no LLM required.
 
+Optional live LLM run (requires `OPENROUTER_API_KEY`):
+
+```bash
+python3 run_tests.py --db ~/hw3-data/blockchain.db --live
+```
+
+Results documented in `tests/LIVE_LLM_RESULTS.md`.
+
 ### Screenshot – Golden Tests
 
 | Thumbnail | Description |
@@ -366,17 +453,24 @@ Document three cases where incorrect SQL still returns a plausible wrong answer,
 ```text
 tests/hard_failures.json
 slides/hard_failures.html
+slides/hard_failures.pptx
+slides/ppt_assets/          # per-case SQL screenshots (embedded in .pptx)
+scripts/build_hard_failures_ppt.py
 scripts/refresh_hard_failures.py
 capture_live_hard.py
 ```
 
 ## Presentation
 
-Open in browser (arrow keys to navigate, F11 for fullscreen):
+**PowerPoint (class):** `slides/hard_failures.pptx` — 5 slides with terminal screenshots for each case.
 
-```text
-slides/hard_failures.html
+Regenerate after DB changes:
+
+```bash
+python3 scripts/build_hard_failures_ppt.py ~/hw3-data/blockchain.db
 ```
+
+**Browser deck:** open `slides/hard_failures.html` (arrow keys, F11 fullscreen).
 
 ## Example Hard Case
 
@@ -428,24 +522,6 @@ python3 scripts/refresh_hard_failures.py ~/hw3-data/blockchain.db
 
 ---
 
-# Setup
-
-```bash
-cd Text-to-SQL
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-cp .env.example .env
-# Edit .env: OPENROUTER_API_KEY=sk-or-v1-...
-```
-
-Use `~/hw3-data/blockchain.db` on WSL — avoid storing the database on `/mnt/c/...` (SQLite disk I/O errors).
-
-`blockchain.db` (~500 MB+) is **gitignored**. Do not commit `.env`, `logs/`, or `.venv/`.
-
----
-
 # Deliverables
 
 This folder contains:
@@ -480,13 +556,17 @@ Text-to-SQL/
 │   ├── extension_cases.json
 │   └── LIVE_LLM_RESULTS.md
 ├── slides/
-│   └── hard_failures.html
+│   ├── hard_failures.html
+│   ├── hard_failures.pptx
+│   └── ppt_assets/
 ├── prompts/
+│   └── ingest_llm_prompt.md    # LLM ingest bonus (documented; not production)
 ├── scripts/
+│   ├── install_cron.sh
+│   ├── build_hard_failures_ppt.py
+│   └── refresh_test_answers.py
 ├── examples/
-├── screenshots/
-├── SUBMISSION.md
-└── SUBMISSION_CHECKLIST.md
+└── screenshots/                # 13 submission PNGs
 ```
 
 **Prerequisite (submitted separately):** `Tooling-for-AI-Generated-Block-Explorer/` — Docker, Bitcoin Core build, HW2 Text-to-SQL prototype.
@@ -514,4 +594,4 @@ This assignment provided practical experience with:
 
 Homework 3 successfully connects the HW2 Bitcoin tooling to a populated SQLite database and an AI-powered query interface. The pipeline ingests real chain data, validates it on every update, passes 12/12 golden SQL tests, and exposes both CLI and web interfaces for natural-language exploration. Hard failure cases and live LLM results are documented to show where free-tier models still struggle despite schema context.
 
-The **Block Explorer AI** application is ready for demonstration, screenshot capture, and class presentation via `slides/hard_failures.html`.
+The **Block Explorer AI** application is ready for demonstration and class presentation via `slides/hard_failures.pptx` (PowerPoint) or `slides/hard_failures.html` (browser).
