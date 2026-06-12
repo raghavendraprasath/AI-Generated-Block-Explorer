@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from project_env import load_project_env
 
-load_project_env()
+load_project_env() 
 JSON_PATH = ROOT / "examples" / "getblock_100000.json"
 PROMPT_PATH = Path(__file__).resolve().parent / "schema_approach1_prompt.md"
 OUT_PATH = ROOT / "prompts" / "schema_llm_direct.sql"

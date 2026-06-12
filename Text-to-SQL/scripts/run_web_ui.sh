@@ -16,4 +16,4 @@ source .venv/bin/activate 2>/dev/null || true
 export HW3_DB_PATH="$DB"
 
 echo "Open http://localhost:8501 in your browser"
-exec streamlit run web_ui.py --server.headless true
+exec streamlit run Home.py --server.headless true

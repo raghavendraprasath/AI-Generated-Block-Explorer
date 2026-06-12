@@ -11,34 +11,83 @@ import matplotlib.pyplot as plt
 from text_to_sql import CANNOT_ANSWER, answer_question
 
 
-def plot_rows(rows: list[tuple], title: str, output: Path) -> None:
+def build_figure(rows: list[tuple], title: str):
+    """Build a matplotlib figure from query rows (for CLI or Streamlit)."""
     if not rows:
         raise ValueError("No data to chart")
+
+    fig, ax = plt.subplots(figsize=(10, 5))
 
     if len(rows[0]) == 1:
         values = [row[0] for row in rows]
         labels = [str(i) for i in range(len(values))]
-        plt.bar(labels, values)
-        plt.xticks(rotation=45, ha="right")
+        ax.bar(labels, values)
+        ax.tick_params(axis="x", rotation=45)
     elif len(rows[0]) == 2:
         x_vals = [row[0] for row in rows]
         y_vals = [row[1] for row in rows]
         if all(isinstance(x, (int, float)) for x in x_vals):
-            plt.plot(x_vals, y_vals, marker="o")
-            plt.xlabel(str(0))
-            plt.ylabel(str(1))
+            ax.plot(x_vals, y_vals, marker="o")
+            ax.set_xlabel("Column 1")
+            ax.set_ylabel("Column 2")
         else:
-            plt.bar([str(x) for x in x_vals], y_vals)
-            plt.xticks(rotation=45, ha="right")
+            ax.bar([str(x) for x in x_vals], y_vals)
+            ax.tick_params(axis="x", rotation=45)
     else:
+        plt.close(fig)
         raise ValueError("Chart supports 1- or 2-column result sets only")
 
-    plt.title(title)
-    plt.tight_layout()
+    ax.set_title(title)
+    fig.tight_layout()
+    return fig
+
+
+def plot_rows(rows: list[tuple], title: str, output: Path) -> None:
+    fig = build_figure(rows, title)
     output.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(output, dpi=150)
-    plt.close()
+    fig.savefig(output, dpi=150)
+    plt.close(fig)
     print(f"Wrote chart to {output}")
+
+
+def fetch_chart_data(
+    question: str,
+    db_path: Path,
+    *,
+    sql: str | None = None,
+    api_key: str | None = None,
+    model: str = "openrouter/free",
+) -> tuple[str, list[tuple]]:
+    """Return (sql, rows) for charting."""
+    if sql:
+        conn = sqlite3.connect(db_path)
+        rows = conn.execute(sql).fetchall()
+        conn.close()
+        return sql, rows
+
+    result = answer_question(question, db_path, api_key=api_key, model=model)
+    if result.get("cannot_answer"):
+        raise ValueError(CANNOT_ANSWER)
+    return result["sql"], result.get("rows", [])
+
+
+CHART_PRESETS = [
+    {
+        "label": "Early blocks · height vs tx count",
+        "question": "Block heights and transaction counts for the first 20 blocks",
+        "sql": "SELECT height, ntx FROM blocks ORDER BY height ASC LIMIT 20",
+    },
+    {
+        "label": "Busiest blocks · top 15 by transactions",
+        "question": "Which blocks have the most transactions?",
+        "sql": "SELECT height, ntx FROM blocks ORDER BY ntx DESC LIMIT 15",
+    },
+    {
+        "label": "BTC price history · sample dates",
+        "question": "BTC USD prices from our pricing table",
+        "sql": "SELECT date, price_usd FROM btc_daily_prices ORDER BY date",
+    },
+]
 
 
 def main() -> int:
@@ -66,17 +115,12 @@ def main() -> int:
         sql = args.sql
     else:
         try:
-            result = answer_question(args.question, db_path, model=args.model)
+            sql, rows = fetch_chart_data(
+                args.question, db_path, model=args.model
+            )
         except Exception as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1
-
-        if result.get("cannot_answer"):
-            print(CANNOT_ANSWER)
-            return 1
-
-        rows = result.get("rows", [])
-        sql = result["sql"]
 
     print(f"SQL: {sql}")
     try:

@@ -39,6 +39,14 @@ Tooling for AI-Generated Block Explorer
 - Bitcoin Core build from source
 - Bitcoin RPC validation
 - LLM Text-to-SQL prototype
+
+### Week 3
+Text-to-SQL (`Text-to-SQL/`)
+
+- SQLite schema from `getblock(hash, 2)` JSON
+- Deterministic ingestion + scheduled updater
+- Natural language → SQL → answers (OpenRouter)
+- Test suite, hard-failure analysis, chat UI, charts
 ---
 
 ## Course

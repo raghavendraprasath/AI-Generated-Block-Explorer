@@ -4,25 +4,25 @@
     "expected_sql": "SELECT hash FROM blocks ORDER BY height DESC LIMIT 1",
     "expected_answer": "0000000000001c1a1a61bba59f0382f24e74a938efb9460f9b71daeedf681b39",
     "incorrect_sql": "SELECT blocks.height FROM blocks WHERE height = (SELECT MAX(height) FROM blocks)",
-    "incorrect_answer": "100000",
+    "incorrect_answer": 110028,
     "why_hard": "Live LLM returned block height instead of block hash (run_tests.py --live, test #11).",
     "live_captured": "2026-06-11"
   },
   {
     "question": "Which block height has the most transactions?",
     "expected_sql": "SELECT block_height FROM transactions GROUP BY block_height ORDER BY COUNT(*) DESC LIMIT 1",
-    "expected_answer": "93107",
+    "expected_answer": 93107,
     "incorrect_sql": "SELECT MAX(block_height) FROM transactions",
-    "incorrect_answer": "100000",
+    "incorrect_answer": 110028,
     "why_hard": "MAX(block_height) is the highest block containing any tx, not the block with the largest transaction count.",
     "live_captured": "2026-06-11"
   },
   {
     "question": "What is the total BTC value of all pubkeyhash (P2PKH) outputs?",
     "expected_sql": "SELECT ROUND(SUM(value), 4) FROM transaction_outputs WHERE scriptpubkey_type = 'pubkeyhash'",
-    "expected_answer": "25913494.6656",
+    "expected_answer": 25913494.6656,
     "incorrect_sql": "SELECT ROUND(SUM(value), 4) FROM transaction_outputs WHERE scriptpubkey_type = 'pubkey'",
-    "incorrect_answer": "5486359.0599",
+    "incorrect_answer": 5989823.0058,
     "why_hard": "Live LLM often confuses P2PK (`pubkey`) with P2PKH (`pubkeyhash`) script types.",
     "live_captured": "2026-06-11"
   }

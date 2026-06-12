@@ -1,11 +1,13 @@
-# Homework 3: Text-to-SQL — Bitcoin Block Explorer
+# Homework 3: Text-to-SQL — Block Explorer AI
 
 **INFO7500 – Cryptocurrency and Smart Contracts**  
 **Student:** Raghavendra Prasath Sridhar
 
 Natural-language questions → SQLite queries over Bitcoin blockchain data ingested from `bitcoind` RPC.
 
-> **Note:** The assignment refers to “getblocks”; Bitcoin Core uses **`getblock(blockhash, 2)`** (verbosity=2) for full block + transaction JSON.
+> Bitcoin Core uses **`getblock(blockhash, 2)`** (verbosity=2) for full block + transaction JSON. The assignment text sometimes says “getblocks”; this project uses `getblock`.
+
+**Evolved from Homework 2:** `Tooling-for-AI-Generated-Block-Explorer/text_to_sql.py` (OpenRouter prototype) → `text_to_sql.py` with live schema, CLI, and SQL execution.
 
 ---
 
@@ -14,28 +16,31 @@ Natural-language questions → SQLite queries over Bitcoin blockchain data inges
 ```
 Text-to-SQL/
 ├── schema.sql                 # Final normalized Bitcoin schema
-├── schema_extensions.sql      # Ethereum + BTC price tables (Notes)
+├── schema_extensions.sql      # Ethereum + BTC price tables
 ├── schema_generated.sql       # Approach 2 auto-draft
 ├── generate_schema.py         # Approach 2 generator
-├── ingest.py                  # Deterministic RPC → SQLite (100% correct)
-├── ingest_extensions.py       # Load Ethereum + pricing samples
+├── ingest.py                  # Deterministic RPC → SQLite
+├── ingest_extensions.py       # Ethereum + pricing samples
 ├── validate.py                # Consistency checks
-├── updater.py                 # Ingest + extensions + validate (for cron)
-├── crontab.example            # Schedule every 5 minutes
+├── updater.py                 # Ingest + extensions + validate
 ├── check_node.py              # getblockcount / getblockchaininfo
 ├── text_to_sql.py             # NL → SQL → answer
-├── chat.py                    # CLI chat UI
-├── web_ui.py                  # Streamlit web chat UI
-├── charts.py                  # Chart generation from queries
+├── chat.py                    # CLI chat
+├── Home.py                    # Streamlit app (entry point)
+├── web_ui.py                  # Shim → Home.py
+├── pages/                     # Insights · Samples
+├── charts.py                  # Matplotlib charts
 ├── run_tests.py               # Test suite
-├── capture_live_hard.py       # Capture live LLM hard-failure outputs
 ├── tests/                     # test_cases, hard_failures, cannot_answer
-├── slides/hard_test_cases.md  # Class presentation
+├── slides/hard_failures.html  # Class presentation (open in browser)
+├── scripts/                   # setup, cron, screenshot demo, proof
 ├── prompts/                   # Schema + ingest LLM documentation
+├── screenshots/               # Your manual submission PNGs
+├── SUBMISSION.md              # Full deliverables list
 └── examples/                  # getblock JSON samples
 ```
 
-`blockchain.db` (~500MB) is **gitignored** — build locally with `ingest.py`.
+`blockchain.db` (~500MB+) is **gitignored**. Build locally or copy to `~/hw3-data/blockchain.db` on WSL.
 
 ---
 
@@ -44,131 +49,146 @@ Text-to-SQL/
 ```bash
 cd Text-to-SQL
 python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
+source .venv/bin/activate          # Windows WSL recommended
 pip install -r requirements.txt
-**API key (one-time setup — recommended):**
 
-```bash
 cp .env.example .env
-# Edit .env and set OPENROUTER_API_KEY=sk-or-v1-...
+# Edit .env: OPENROUTER_API_KEY=sk-or-v1-...
 ```
 
-All scripts (`text_to_sql.py`, `chat.py`, `web_ui.py`, `run_tests.py --live`) load `.env` automatically.  
-Alternative: `export OPENROUTER_API_KEY=...` in `~/.bashrc` for every shell.
-```
+All LLM scripts load `.env` automatically via `project_env.py`.
 
-### bitcoind (§1)
+### bitcoind
 
 ```bash
-# WSL — after building Bitcoin Core
-./build/bin/bitcoind -daemon
-python3 check_node.py              # getblockcount, getblockchaininfo
+./build/bin/bitcoind -daemon       # from HW2 Bitcoin Core build
+python3 check_node.py              # getblockcount, getblockchaininfo, getblock
 ```
 
-Sync ~100,000+ blocks (or until disk limit). Node should keep running for new blocks.
+Sync ~100,000+ blocks. Keep the node running for the updater.
+
+### Database (WSL — recommended)
+
+```bash
+mkdir -p ~/hw3-data
+cp /path/to/blockchain.db ~/hw3-data/   # or ingest fresh
+python3 ingest_extensions.py --db ~/hw3-data/blockchain.db
+```
+
+Use `~/hw3-data/blockchain.db` everywhere — avoid `/mnt/c/...` (SQLite disk I/O errors).
 
 ---
 
-## §2 Schema
+## Part 1 — bitcoind sync
 
-**Final schema:** `schema.sql` — blocks, transactions, vin, vout, coinbase, sync_state, `txinwitness`.
+- **110k+ blocks** synced in our environment
+- Proof: `python3 check_node.py` or `./scripts/generate_submission_proof.sh ~/hw3-data/blockchain.db`
 
-### Bonus §2a — Two auto-generation approaches
+---
+
+## Part 2 — Schema
+
+**Final schema:** `schema.sql` — blocks, transactions, inputs, outputs, coinbase, sync_state, txinwitness.
+
+### Bonus — auto-generate schema from JSON
 
 | Approach | Command | Output |
 |----------|---------|--------|
-| **1 — LLM → SQL** | `python3 prompts/run_approach1.py` | `prompts/schema_llm_direct.sql` |
-| **2 — Code → SQL** | `python3 generate_schema.py examples/getblock_100000.json schema_generated.sql` | `schema_generated.sql` |
+| LLM → SQL directly | `python3 prompts/run_approach1.py` | `prompts/schema_llm_direct.sql` |
+| Code → SQL | `python3 generate_schema.py examples/getblock_100000.json schema_generated.sql` | `schema_generated.sql` |
 
-See `prompts/schema_llm_prompt.md` for limitations and manual fixes → `schema.sql`.
-
----
-
-## §3 Updater + consistency
-
-### Initial ingest (100k blocks)
-
-```bash
-python3 ingest.py --db /absolute/path/to/blockchain.db --start 0 --end 100000
-python3 ingest_extensions.py --db /absolute/path/to/blockchain.db
-python3 validate.py --db /absolute/path/to/blockchain.db
-```
-
-### Scheduled updates (every few minutes)
-
-```bash
-python3 updater.py --db /absolute/path/to/blockchain.db
-# Cron: see crontab.example (*/5 * * * *)
-```
-
-### Bonus §3b — 100% correct ingestion
-
-We **document** LLM ingestion (`prompts/ingest_llm_prompt.md`) but use **deterministic `ingest.py`** at runtime for guaranteed correctness. `validate.py` checks height continuity, `ntx` counts, FK orphans, and optional RPC tip.
+See `prompts/schema_llm_prompt.md` and `prompts/prompt_engineering_examples.md` for limitations and manual fixes → `schema.sql`.
 
 ---
 
-## §4 Text-to-SQL
+## Part 3 — Updater & consistency
+
+```bash
+# Initial ingest
+python3 ingest.py --db ~/hw3-data/blockchain.db --start 0 --end 100000
+python3 ingest_extensions.py --db ~/hw3-data/blockchain.db
+python3 validate.py --db ~/hw3-data/blockchain.db
+
+# Manual update
+python3 updater.py --db ~/hw3-data/blockchain.db
+
+# Cron (every 5 min)
+./scripts/install_cron.sh ~/hw3-data/blockchain.db
+```
+
+**Bonus ingestion:** LLM approach documented in `prompts/ingest_llm_prompt.md`; production uses deterministic `ingest.py` for 100% correctness.
+
+`validate.py` checks height continuity, `ntx` counts, foreign keys, and optional RPC tip cross-check.
+
+---
+
+## Part 4 — Text-to-SQL
 
 ```bash
 python3 text_to_sql.py \
   --question "How many blocks are in the database?" \
-  --db /absolute/path/to/blockchain.db
+  --db ~/hw3-data/blockchain.db
 ```
 
-- **System prompt (§4c.i):** exact assignment text in `text_to_sql.CORE_SYSTEM_PROMPT`
-- **Schema:** auto-loaded from `sqlite_master`
-- **User message:** schema + question instance
-- **Notes:** `CANNOT_ANSWER` for unanswerable questions (live API, unrelated domains)
+- **System prompt:** exact assignment text in `text_to_sql.CORE_SYSTEM_PROMPT`
+- **Schema:** loaded from `sqlite_master` into the user message
+- **CANNOT_ANSWER:** for unanswerable questions (live API, unrelated domains)
 
-### Chat UI (Notes)
-
-**Web UI (recommended for screenshots):**
+### Block Explorer AI (Streamlit)
 
 ```bash
-export OPENROUTER_API_KEY=your_key
 ./scripts/run_web_ui.sh ~/hw3-data/blockchain.db
-# Open http://localhost:8501
+# Open http://localhost:8501 in your system browser
 ```
 
-**CLI chat:**
+| Page | Purpose |
+|------|---------|
+| **Home** | Natural-language chat |
+| **Insights** | Charts from queries |
+| **Samples** | Curated test questions |
 
-```bash
-python3 chat.py --db /absolute/path/to/blockchain.db
-```
+CLI alternative: `python3 chat.py --db ~/hw3-data/blockchain.db`
 
-### Charts (Notes)
+### Charts
 
 ```bash
 python3 charts.py \
-  --question "SELECT block_height, COUNT(*) FROM transactions GROUP BY block_height ORDER BY block_height LIMIT 50" \
-  --db /absolute/path/to/blockchain.db \
-  --output charts/blocks_tx_count.png
+  --question "Heights and tx counts for first 20 blocks" \
+  --db ~/hw3-data/blockchain.db \
+  --sql "SELECT height, ntx FROM blocks ORDER BY height ASC LIMIT 20" \
+  --output charts/output.png
 ```
 
-Or use a natural-language question that returns 1–2 columns.
+Or use the **Insights** page in the web app.
 
 ---
 
-## §5–§6 Tests
+## Part 5 & 6 — Tests
 
 ```bash
-# Golden SQL tests (no API key needed)
-python3 run_tests.py --db /absolute/path/to/blockchain.db
+# Golden SQL tests (no API key)
+python3 run_tests.py --db ~/hw3-data/blockchain.db --standard-only
 
-# Live LLM tests (CANNOT_ANSWER + optional LLM accuracy)
-python3 run_tests.py --db /absolute/path/to/blockchain.db --live
-
-# Capture live incorrect SQL for hard cases
-python3 capture_live_hard.py --db /absolute/path/to/blockchain.db --write
+# Live LLM (optional)
+python3 run_tests.py --db ~/hw3-data/blockchain.db --live
+python3 capture_live_hard.py --db ~/hw3-data/blockchain.db --write
 ```
 
 | File | Purpose |
 |------|---------|
 | `tests/test_cases.json` | 12 standard triples (question, SQL, answer) |
 | `tests/hard_failures.json` | 3 hard cases with expected + incorrect SQL/answers |
-| `tests/cannot_answer_cases.json` | Questions that must return `CANNOT_ANSWER` |
-| `tests/extension_cases.json` | Ethereum + pricing queries |
-| `slides/hard_test_cases.md` | Class slide (SpiderV2 reference) |
+| `tests/cannot_answer_cases.json` | Must return `CANNOT_ANSWER` |
+| `tests/extension_cases.json` | Ethereum + pricing |
+| `tests/LIVE_LLM_RESULTS.md` | Honest live LLM scores |
+| `slides/hard_failures.html` | Class presentation — arrow keys, F11 fullscreen |
+
+Refresh answers after DB grows:
+
+```bash
+python3 scripts/refresh_test_answers.py ~/hw3-data/blockchain.db
+python3 scripts/refresh_hard_failures.py ~/hw3-data/blockchain.db
+```
 
 ---
 
@@ -176,45 +196,27 @@ python3 capture_live_hard.py --db /absolute/path/to/blockchain.db --write
 
 | Feature | Implementation |
 |---------|----------------|
-| **Ethereum** | `ethereum_blocks` table + `examples/eth_block_sample.json` |
-| **BTC pricing** | `btc_daily_prices` table + `examples/btc_prices_sample.json` |
-| **CANNOT_ANSWER** | `text_to_sql.py` + `tests/cannot_answer_cases.json` |
-| **Chat UI** | `web_ui.py` (Streamlit) + `chat.py` (CLI) |
-| **Charts** | `charts.py` (matplotlib) |
-
-Live CoinGecko / full Ethereum sync are **out of scope**; the schema supports extensions and the LLM rejects live/unavailable data.
+| Ethereum | `ethereum_blocks` + `examples/eth_block_sample.json` |
+| BTC pricing | `btc_daily_prices` + `examples/btc_prices_sample.json` |
+| CANNOT_ANSWER | `text_to_sql.py` + `tests/cannot_answer_cases.json` |
+| Chat UI | `Home.py` + `chat.py` |
+| Charts | `charts.py` + Insights page |
 
 ---
 
-## Database stats (reference)
+## Screenshots & submission
 
-After ingesting blocks 0–100,000:
+**Do not use auto-generated PNGs.** Capture your own:
 
-| Metric | Value |
-|--------|-------|
-| Blocks | 100,001 |
-| Transactions | 216,575 |
-| Max height | 100,000 |
+```bash
+chmod +x scripts/demo_for_screenshots.sh
+./scripts/demo_for_screenshots.sh ~/hw3-data/blockchain.db
+```
 
----
+Essential shots listed in `screenshots/README.md` (7 terminal + browser captures).
 
-## Submission
-
-**Full checklist:** `SUBMISSION_CHECKLIST.md`  
-**WSL database:** use `~/hw3-data/blockchain.db` (not `/mnt/c/...` — avoids disk I/O errors)  
-**Proof script:** `./scripts/generate_submission_proof.sh ~/hw3-data/blockchain.db`  
-**Live LLM:** `./scripts/run_live_suite.sh ~/hw3-data/blockchain.db`
-
-## Screenshots checklist
-
-1. `check_node.py` — `getblockcount` / `getblockchaininfo` / `getblock` on tip
-2. `generate_schema.py` output / `schema_generated.sql`
-3. `ingest.py` progress through block 100,000
-4. `validate.py` passing
-5. `text_to_sql.py` sample Q&A
-6. `run_tests.py` all passing
-7. `chat.py` session
-8. `charts.py` output PNG
+**Full deliverables:** `SUBMISSION.md`  
+**Pre-submit checklist:** `SUBMISSION_CHECKLIST.md`
 
 ---
 

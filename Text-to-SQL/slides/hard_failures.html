@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hard Text-to-SQL Failures — INFO7500 HW3</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #0d1117; color: #e6edf3;
+      overflow: hidden; height: 100vh;
+    }
+    .deck { height: 100vh; position: relative; }
+    .slide {
+      display: none; height: 100vh; padding: 3rem 4rem;
+      flex-direction: column; justify-content: center;
+    }
+    .slide.active { display: flex; }
+    h1 { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; color: #f7931a; margin-bottom: 1.25rem; font-weight: 600; }
+    .subtitle { color: #8b949e; font-size: 1.1rem; margin-bottom: 2rem; }
+    .question {
+      font-size: 1.35rem; font-weight: 600; margin-bottom: 1.5rem;
+      padding: 1rem 1.25rem; background: #161b22; border-radius: 8px;
+      border-left: 4px solid #f7931a;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin-bottom: 1rem; }
+    th, td { text-align: left; padding: 0.65rem 0.85rem; border-bottom: 1px solid #30363d; vertical-align: top; }
+    th { color: #8b949e; font-weight: 600; width: 11rem; }
+    code {
+      font-family: "Cascadia Code", "Consolas", monospace; font-size: 0.82rem;
+      background: #161b22; padding: 0.15rem 0.4rem; border-radius: 4px;
+      word-break: break-all;
+    }
+    .wrong { color: #f85149; }
+    .right { color: #3fb950; }
+    .why { color: #8b949e; font-size: 1rem; margin-top: 1rem; line-height: 1.5; }
+    .nav {
+      position: fixed; bottom: 1.5rem; right: 2rem;
+      color: #8b949e; font-size: 0.85rem;
+    }
+    .progress {
+      position: fixed; bottom: 0; left: 0; height: 3px;
+      background: #f7931a; transition: width 0.2s;
+    }
+    a { color: #58a6ff; }
+    ul { margin-left: 1.25rem; line-height: 1.7; color: #c9d1d9; }
+    .badge {
+      display: inline-block; font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.06em; color: #f7931a; border: 1px solid #f7931a55;
+      padding: 0.2rem 0.5rem; border-radius: 4px; margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+
+    <section class="slide active">
+      <span class="badge">INFO7500 · Homework 3</span>
+      <h1>When Text-to-SQL Fails</h1>
+      <p class="subtitle">Three hard cases where incorrect SQL still returns a plausible wrong answer</p>
+      <p class="why">
+        Reference: <a href="https://spider2-sql.github.io/" target="_blank">Spider 2.0 leaderboard</a>
+        — complex SQL beyond current model limits
+      </p>
+      <p class="why" style="margin-top: 2rem;">← → arrow keys &nbsp;·&nbsp; F11 fullscreen</p>
+    </section>
+
+    <section class="slide">
+      <h2>Case 1 — Column selection</h2>
+      <div class="question">What is the hash of the block at the maximum height?</div>
+      <table>
+        <tr><th>Correct SQL</th><td><code>SELECT hash FROM blocks ORDER BY height DESC LIMIT 1</code></td></tr>
+        <tr><th class="right">Correct answer</th><td class="right"><code>0000000000001c1a…f681b39</code></td></tr>
+        <tr><th>LLM SQL</th><td><code>SELECT blocks.height FROM blocks WHERE height = (SELECT MAX(height) FROM blocks)</code></td></tr>
+        <tr><th class="wrong">Wrong answer</th><td class="wrong"><strong>110028</strong> (height, not hash)</td></tr>
+      </table>
+      <p class="why">The model returns a valid number but answers the wrong column — hash vs height.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Case 2 — Aggregation logic</h2>
+      <div class="question">Which block height has the most transactions?</div>
+      <table>
+        <tr><th>Correct SQL</th><td><code>SELECT block_height FROM transactions GROUP BY block_height ORDER BY COUNT(*) DESC LIMIT 1</code></td></tr>
+        <tr><th class="right">Correct answer</th><td class="right"><strong>93107</strong></td></tr>
+        <tr><th>LLM SQL</th><td><code>SELECT MAX(block_height) FROM transactions</code></td></tr>
+        <tr><th class="wrong">Wrong answer</th><td class="wrong"><strong>110028</strong></td></tr>
+      </table>
+      <p class="why">MAX(block_height) = highest block with any tx ≠ block with the largest tx count.</p>
+    </section>
+
+    <section class="slide">
+      <h2>Case 3 — Domain enums</h2>
+      <div class="question">What is the total BTC value of all pubkeyhash (P2PKH) outputs?</div>
+      <table>
+        <tr><th>Correct SQL</th><td><code>… WHERE scriptpubkey_type = 'pubkeyhash'</code></td></tr>
+        <tr><th class="right">Correct answer</th><td class="right"><strong>25,913,494.67 BTC</strong></td></tr>
+        <tr><th>LLM SQL</th><td><code>… WHERE scriptpubkey_type = 'pubkey'</code></td></tr>
+        <tr><th class="wrong">Wrong answer</th><td class="wrong"><strong>5,989,823.01 BTC</strong></td></tr>
+      </table>
+      <p class="why">P2PK (<code>pubkey</code>) and P2PKH (<code>pubkeyhash</code>) are different script types in Bitcoin Core.</p>
+    </section>
+
+    <section class="slide">
+      <h1>Takeaway</h1>
+      <ul style="margin-top: 1.5rem; font-size: 1.15rem;">
+        <li>Schema in context is not enough for free LLMs</li>
+        <li>Failures: wrong column, wrong aggregation, wrong enum</li>
+        <li>Wrong SQL can still execute and look plausible</li>
+        <li>Golden SQL tests (12/12) validate the database; live LLM is the weak link</li>
+      </ul>
+      <p class="why" style="margin-top: 2rem;">Data: <code>tests/hard_failures.json</code> · Block Explorer AI</p>
+    </section>
+
+  </div>
+  <div class="progress" id="progress"></div>
+  <div class="nav" id="nav">1 / 5</div>
+
+  <script>
+    const slides = document.querySelectorAll(".slide");
+    let i = 0;
+    function show(n) {
+      i = Math.max(0, Math.min(n, slides.length - 1));
+      slides.forEach((s, j) => s.classList.toggle("active", j === i));
+      document.getElementById("nav").textContent = `${i + 1} / ${slides.length}`;
+      document.getElementById("progress").style.width = `${((i + 1) / slides.length) * 100}%`;
+    }
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === " ") show(i + 1);
+      if (e.key === "ArrowLeft") show(i - 1);
+    });
+    show(0);
+  </script>
+</body>
+</html>

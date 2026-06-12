@@ -1,44 +1,32 @@
-# Homework 3 — Submission Checklist
+# Homework 3 — Pre-submit checklist
 
 ## Done in repo
 
-- [x] §2 Schema + ingest + validate + updater
-- [x] §2a Approach 1 + Approach 2
-- [x] §3b deterministic ingest + §3c cron (`install_cron.sh`, `logs/cron.log`)
-- [x] §3d proof log (`logs/submission_proof.txt`)
-- [x] §4 `text_to_sql.py` + web UI + CLI chat
-- [x] §5 twelve test triples + golden tests **12/12** (answers synced to 110k-block DB)
-- [x] §6 three hard failures + slide
+- [x] Schema + ingest + validate + updater
+- [x] Schema auto-generation bonus (Approach 1 + 2)
+- [x] Cron updater (`install_cron.sh`, `logs/cron.log`)
+- [x] Text-to-SQL + Block Explorer AI UI (Home · Insights · Samples)
+- [x] 12 golden test triples
+- [x] 3 hard failures + HTML slide deck
 - [x] Notes: Ethereum, pricing, charts, CANNOT_ANSWER
-- [x] Screenshots in `screenshots/` (01–09, 08 chart)
-- [x] `tests/LIVE_LLM_RESULTS.md` (honest partial live scores + rate-limit note)
 
-## Regenerate evidence (optional)
+## Your actions
 
-```bash
-cd /mnt/c/Users/adity/Desktop/INFO7500/AI-Generated-Block-Explorer/Text-to-SQL
-source .venv/bin/activate
+1. **Screenshots** — `./scripts/demo_for_screenshots.sh ~/hw3-data/blockchain.db`  
+   See `screenshots/README.md`
 
-# After updater grows the DB, refresh golden answers:
-python3 scripts/refresh_test_answers.py ~/hw3-data/blockchain.db
+2. **Refresh DB-dependent answers** (if updater added blocks):
+   ```bash
+   python3 scripts/refresh_test_answers.py ~/hw3-data/blockchain.db
+   python3 scripts/refresh_hard_failures.py ~/hw3-data/blockchain.db
+   ```
 
-# Proof + screenshots:
-./scripts/generate_submission_proof.sh ~/hw3-data/blockchain.db
-python3 scripts/generate_submission_screenshots.py --db ~/hw3-data/blockchain.db
+3. **Presentation** — open `slides/hard_failures.html` in browser (F11 fullscreen)
 
-# Live LLM (when OpenRouter quota available):
-./scripts/run_live_suite.sh ~/hw3-data/blockchain.db
-```
+4. **Proof log** (optional): `./scripts/generate_submission_proof.sh ~/hw3-data/blockchain.db`
 
-## Replace mock chat screenshot (optional)
+5. **Git commit** — see `SUBMISSION.md`
 
-`screenshots/07_chat.png` is a rendered mock. Replace with your browser capture of the Streamlit UI for a polished submission.
+## Final step
 
-## Git
-
-```bash
-cd /mnt/c/Users/adity/Desktop/INFO7500/AI-Generated-Block-Explorer
-git add Text-to-SQL/
-git status   # confirm blockchain.db and .env NOT staged
-git commit -m "Add Homework 3 Text-to-SQL deliverables"
-```
+Update **`README.md`** after screenshots and any last code changes so it reflects the final state of the project.

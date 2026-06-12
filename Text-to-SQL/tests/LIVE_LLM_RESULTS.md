@@ -1,7 +1,7 @@
-# Live LLM Test Results (§4 + §5)
+# Live LLM Test Results
 
 **Model:** `google/gemma-4-31b-it:free` (via `.env`)  
-**Database:** `/home/adity/hw3-data/blockchain.db` (110,029 blocks after §3 updater sync)  
+**Database:** `/home/adity/hw3-data/blockchain.db` (110k+ blocks after updater sync)  
 **Command:** `./scripts/run_live_suite.sh ~/hw3-data/blockchain.db`  
 **Date:** 2026-06-11
 
@@ -36,9 +36,9 @@ Run hit OpenRouter free-tier rate limit (429) before completion. Prior runs:
 | Dogecoin blocks | CANNOT_ANSWER | **PASS** |
 | Boston weather | CANNOT_ANSWER | FAIL (malformed SQL) |
 
-## Hard failures (§6)
+## Hard failures
 
-See `tests/hard_failures.json` and `slides/hard_test_cases.md`.
+See `tests/hard_failures.json` and `slides/hard_failures.html`.
 
 | Case | Status on 2026-06-11 live run |
 |------|-------------------------------|
@@ -48,5 +48,5 @@ See `tests/hard_failures.json` and `slides/hard_test_cases.md`.
 
 ## Notes
 
-- After §3 updater synced blocks 100001–110028, run `python3 scripts/refresh_test_answers.py ~/hw3-data/blockchain.db` to refresh golden answers.
+- After the updater syncs new blocks, run `python3 scripts/refresh_test_answers.py ~/hw3-data/blockchain.db` to refresh golden answers.
 - Free OpenRouter models hit daily/minute limits during batch `--live` runs; UI chat with gemma works for demos.
