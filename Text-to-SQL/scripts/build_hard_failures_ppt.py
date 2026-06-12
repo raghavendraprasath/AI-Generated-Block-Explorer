@@ -11,7 +11,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from pptx import Presentation
 from pptx.dml.color import RGBColor
-from pptx.enum.text import PP_ALIGN
+from pptx.enum.shapes import MSO_SHAPE
 from pptx.util import Inches, Pt
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -29,7 +29,11 @@ ORANGE = (247, 147, 26)
 TEXT = (230, 237, 243)
 MUTED = (139, 148, 158)
 
-
+RGB_BG = RGBColor(*BG)
+RGB_PANEL = RGBColor(*PANEL)
+RGB_TEXT = RGBColor(*TEXT)
+RGB_MUTED = RGBColor(*MUTED)
+RGB_ORANGE = RGBColor(*ORANGE)
 def _font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     candidates = [
         "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
@@ -98,8 +102,51 @@ def render_terminal_image(
         draw.text((pad, y), line, fill=color, font=f)
         y += line_h
 
+    # Subtle border so screenshots read clearly on dark slides
+    draw.rectangle(
+        [(2, 2), (width - 3, height - 3)],
+        outline=ORANGE,
+        width=2,
+    )
+
     path.parent.mkdir(parents=True, exist_ok=True)
     img.save(path)
+
+
+def _new_dark_slide(prs: Presentation):
+    """Blank slide with GitHub-dark background and orange top accent."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    fill = slide.background.fill
+    fill.solid()
+    fill.fore_color.rgb = RGB_BG
+
+    accent = slide.shapes.add_shape(
+        MSO_SHAPE.RECTANGLE, 0, 0, prs.slide_width, Inches(0.08)
+    )
+    accent.fill.solid()
+    accent.fill.fore_color.rgb = RGB_ORANGE
+    accent.line.fill.background()
+    return slide
+
+
+def _add_panel(
+    slide,
+    left: float,
+    top: float,
+    width: float,
+    height: float,
+) -> None:
+    panel = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE,
+        Inches(left),
+        Inches(top),
+        Inches(width),
+        Inches(height),
+    )
+    panel.fill.solid()
+    panel.fill.fore_color.rgb = RGB_PANEL
+    panel.line.color.rgb = RGBColor(48, 54, 61)
+    panel.line.width = Pt(1)
 
 
 CASE_META = [
@@ -140,32 +187,34 @@ def build_images(cases: list[dict]) -> list[Path]:
 
 
 def _add_title_slide(prs: Presentation) -> None:
-    slide = prs.slides.add_slide(prs.slide_layouts[6])
-    box = slide.shapes.add_textbox(Inches(0.7), Inches(1.4), Inches(8.6), Inches(4))
+    slide = _new_dark_slide(prs)
+    _add_panel(slide, 0.55, 1.15, 8.9, 4.6)
+
+    box = slide.shapes.add_textbox(Inches(0.85), Inches(1.45), Inches(8.3), Inches(4))
     tf = box.text_frame
     tf.word_wrap = True
 
     p = tf.paragraphs[0]
     p.text = "When Text-to-SQL Fails"
-    p.font.size = Pt(40)
+    p.font.size = Pt(44)
     p.font.bold = True
-    p.font.color.rgb = RGBColor(230, 237, 243)
+    p.font.color.rgb = RGB_TEXT
 
     for text, size, color in [
-        ("INFO7500 · Homework 3 · Block Explorer AI", 20, RGBColor(247, 147, 26)),
+        ("INFO7500 · Homework 3 · Block Explorer AI", 22, RGB_ORANGE),
         (
             "Three hard cases where incorrect SQL still returns a plausible wrong answer",
             18,
-            RGBColor(139, 148, 158),
+            RGB_MUTED,
         ),
-        ("Reference: Spider 2.0 Text-to-SQL leaderboard", 14, RGBColor(139, 148, 158)),
-        ("Data: tests/hard_failures.json", 14, RGBColor(139, 148, 158)),
+        ("Reference: Spider 2.0 Text-to-SQL leaderboard", 15, RGB_MUTED),
+        ("Data: tests/hard_failures.json", 15, RGB_MUTED),
     ]:
         para = tf.add_paragraph()
         para.text = text
         para.font.size = Pt(size)
         para.font.color.rgb = color
-        para.space_before = Pt(12)
+        para.space_before = Pt(14)
 
 
 def _add_case_slide(
@@ -176,42 +225,47 @@ def _add_case_slide(
     why: str,
     image_path: Path,
 ) -> None:
-    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    slide = _new_dark_slide(prs)
 
-    title = slide.shapes.add_textbox(Inches(0.5), Inches(0.25), Inches(9), Inches(0.6))
+    title = slide.shapes.add_textbox(Inches(0.5), Inches(0.22), Inches(9), Inches(0.55))
     tp = title.text_frame.paragraphs[0]
     tp.text = heading
-    tp.font.size = Pt(28)
+    tp.font.size = Pt(30)
     tp.font.bold = True
-    tp.font.color.rgb = RGBColor(247, 147, 26)
+    tp.font.color.rgb = RGB_ORANGE
 
-    qbox = slide.shapes.add_textbox(Inches(0.5), Inches(0.85), Inches(9), Inches(0.7))
+    _add_panel(slide, 0.45, 0.78, 9.1, 0.72)
+    qbox = slide.shapes.add_textbox(Inches(0.65), Inches(0.92), Inches(8.7), Inches(0.55))
     qp = qbox.text_frame.paragraphs[0]
     qp.text = f"Question: {question}"
-    qp.font.size = Pt(16)
+    qp.font.size = Pt(17)
     qp.font.bold = True
-    qp.font.color.rgb = RGBColor(230, 237, 243)
+    qp.font.color.rgb = RGB_TEXT
 
-    slide.shapes.add_picture(str(image_path), Inches(0.35), Inches(1.55), width=Inches(9.3))
+    slide.shapes.add_picture(str(image_path), Inches(0.35), Inches(1.62), width=Inches(9.3))
 
-    wbox = slide.shapes.add_textbox(Inches(0.5), Inches(5.15), Inches(9), Inches(0.8))
+    _add_panel(slide, 0.45, 5.05, 9.1, 0.95)
+    wbox = slide.shapes.add_textbox(Inches(0.65), Inches(5.2), Inches(8.7), Inches(0.75))
     wp = wbox.text_frame.paragraphs[0]
     wp.text = f"Why it's hard: {why}"
-    wp.font.size = Pt(14)
-    wp.font.color.rgb = RGBColor(139, 148, 158)
+    wp.font.size = Pt(15)
+    wp.font.color.rgb = RGB_MUTED
+    wp.font.bold = False
 
 
 def _add_takeaway_slide(prs: Presentation) -> None:
-    slide = prs.slides.add_slide(prs.slide_layouts[6])
-    box = slide.shapes.add_textbox(Inches(0.8), Inches(1.0), Inches(8.4), Inches(4.5))
+    slide = _new_dark_slide(prs)
+    _add_panel(slide, 0.55, 0.85, 8.9, 5.5)
+
+    box = slide.shapes.add_textbox(Inches(0.85), Inches(1.1), Inches(8.3), Inches(5))
     tf = box.text_frame
     tf.word_wrap = True
 
     p = tf.paragraphs[0]
     p.text = "Takeaway"
-    p.font.size = Pt(36)
+    p.font.size = Pt(38)
     p.font.bold = True
-    p.font.color.rgb = RGBColor(230, 237, 243)
+    p.font.color.rgb = RGB_ORANGE
 
     bullets = [
         "Schema in context is not enough for free LLMs",
@@ -222,11 +276,11 @@ def _add_takeaway_slide(prs: Presentation) -> None:
     ]
     for bullet in bullets:
         para = tf.add_paragraph()
-        para.text = bullet
+        para.text = f"• {bullet}"
         para.level = 0
-        para.font.size = Pt(20)
-        para.font.color.rgb = RGBColor(201, 209, 217)
-        para.space_before = Pt(10)
+        para.font.size = Pt(21)
+        para.font.color.rgb = RGB_TEXT
+        para.space_before = Pt(12)
 
 
 def build_ppt(cases: list[dict], image_paths: list[Path], out_path: Path) -> None:
