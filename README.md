@@ -1,6 +1,33 @@
 # AI-Generated Block Explorer
 
-An AI-powered Bitcoin Block Explorer developed as part of INFO7500: Cryptocurrency and Smart Contracts at Northeastern University.
+An AI-powered Bitcoin Block Explorer developed as part of **INFO7500: Cryptocurrency and Smart Contracts** at Northeastern University.
+
+<p align="center">
+  <strong>Block Explorer AI</strong> — natural language · SQL · on-chain answers
+</p>
+
+<p align="center">
+  <a href="Text-to-SQL/screenshots/ui_demo_home.png">
+    <img src="Text-to-SQL/screenshots/ui_demo_home.png" alt="Home — chat" width="30%" />
+  </a>
+  <a href="Text-to-SQL/screenshots/ui_demo_charts.png">
+    <img src="Text-to-SQL/screenshots/ui_demo_charts.png" alt="Insights — charts" width="30%" />
+  </a>
+  <a href="Text-to-SQL/screenshots/ui_demo_examples.png">
+    <img src="Text-to-SQL/screenshots/ui_demo_examples.png" alt="Samples — starter questions" width="30%" />
+  </a>
+</p>
+
+<p align="center">
+  <em>Home</em> &nbsp;·&nbsp; <em>Insights</em> &nbsp;·&nbsp; <em>Samples</em>
+</p>
+
+```bash
+cd Text-to-SQL && ./scripts/run_web_ui.sh ~/hw3-data/blockchain.db
+# → http://localhost:8501
+```
+
+---
 
 ## Project Goal
 
@@ -27,13 +54,14 @@ The system will translate natural language questions into SQL queries and retrie
 - SQLite
 - OpenRouter
 - Large Language Models (LLMs)
+- Streamlit (Block Explorer AI web UI)
 
 ---
 
 ## Project Roadmap
 
 ### Week 2
-Tooling for AI-Generated Block Explorer
+Tooling for AI-Generated Block Explorer (`Tooling-for-AI-Generated-Block-Explorer/`)
 
 - Docker setup
 - Bitcoin Core build from source
@@ -46,21 +74,9 @@ Text-to-SQL (`Text-to-SQL/`)
 - SQLite schema from `getblock(hash, 2)` JSON
 - Deterministic ingestion + scheduled updater
 - Natural language → SQL → answers (OpenRouter)
-- Test suite, hard-failure analysis, chat UI, charts
+- Test suite, hard-failure analysis, **Block Explorer AI** UI, charts
 
-#### Block Explorer AI (Streamlit UI)
-
-```bash
-cd Text-to-SQL
-./scripts/run_web_ui.sh ~/hw3-data/blockchain.db
-# Open http://localhost:8501
-```
-
-| Page | Thumbnail | Description |
-|------|-----------|-------------|
-| **Home** | [![Home](Text-to-SQL/screenshots/ui_demo_home.png)](Text-to-SQL/screenshots/ui_demo_home.png) | Natural-language chat — question, generated SQL, and answer. |
-| **Insights** | [![Insights](Text-to-SQL/screenshots/ui_demo_charts.png)](Text-to-SQL/screenshots/ui_demo_charts.png) | Charts from SQL query results (presets or custom questions). |
-| **Samples** | [![Samples](Text-to-SQL/screenshots/ui_demo_examples.png)](Text-to-SQL/screenshots/ui_demo_examples.png) | Curated starter questions to explore the database. |
+See [`Text-to-SQL/README.md`](Text-to-SQL/README.md) for full documentation and screenshots.
 
 ---
 
