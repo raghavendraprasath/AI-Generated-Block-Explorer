@@ -47,6 +47,21 @@ Text-to-SQL (`Text-to-SQL/`)
 - Deterministic ingestion + scheduled updater
 - Natural language → SQL → answers (OpenRouter)
 - Test suite, hard-failure analysis, chat UI, charts
+
+#### Block Explorer AI (Streamlit UI)
+
+```bash
+cd Text-to-SQL
+./scripts/run_web_ui.sh ~/hw3-data/blockchain.db
+# Open http://localhost:8501
+```
+
+| Page | Thumbnail | Description |
+|------|-----------|-------------|
+| **Home** | [![Home](Text-to-SQL/screenshots/ui_demo_home.png)](Text-to-SQL/screenshots/ui_demo_home.png) | Natural-language chat — question, generated SQL, and answer. |
+| **Insights** | [![Insights](Text-to-SQL/screenshots/ui_demo_charts.png)](Text-to-SQL/screenshots/ui_demo_charts.png) | Charts from SQL query results (presets or custom questions). |
+| **Samples** | [![Samples](Text-to-SQL/screenshots/ui_demo_examples.png)](Text-to-SQL/screenshots/ui_demo_examples.png) | Curated starter questions to explore the database. |
+
 ---
 
 ## Course
